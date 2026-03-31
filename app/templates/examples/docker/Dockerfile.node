@@ -1,0 +1,18 @@
+# Example Dockerfile template (Node.js)
+#
+# Jinja2 variables:
+#   - base_image:      Base Docker image (e.g., node:20-alpine)
+#   - container_port:  Port the app listens on
+
+FROM {{ base_image }}
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --production
+
+COPY . .
+
+EXPOSE {{ container_port }}
+
+CMD ["node", "server.js"]

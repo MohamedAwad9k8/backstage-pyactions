@@ -1,0 +1,18 @@
+# Example Dockerfile template
+#
+# Jinja2 variables:
+#   - base_image:      Base Docker image (e.g., python:3.11-slim, node:20-alpine)
+#   - container_port:  Port the app listens on
+
+FROM {{ base_image }}
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE {{ container_port }}
+
+CMD ["python", "main.py"]

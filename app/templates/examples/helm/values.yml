@@ -1,0 +1,41 @@
+# Example Helm values template
+#
+# Demonstrates Jinja2 conditionals: resource limits are set based on
+# the target environment (production gets more resources than dev/staging).
+#
+# Jinja2 variables:
+#   - app_name:       Name of the service
+#   - replica_count:  Number of replicas
+#   - image_repo:     Container image repository
+#   - image_tag:      Container image tag
+#   - container_port: Port the app listens on
+#   - env:            Target environment (e.g., dev, staging, production)
+
+replicaCount: {{ replica_count }}
+
+image:
+  repository: {{ image_repo }}
+  tag: {{ image_tag }}
+
+{% if env == "production" %}
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+{% else %}
+resources:
+  limits:
+    cpu: 250m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+{% endif %}
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: {{ container_port }}

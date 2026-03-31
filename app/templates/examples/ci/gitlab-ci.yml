@@ -1,0 +1,47 @@
+# Example GitLab CI template
+#
+# Jinja2 variables:
+#   - app_name:    Name of the service
+#   - image_repo:  Container registry URL
+#
+# These jobs are meant to extend shared job definitions pulled in via
+# `include:` from a central CI templates repo. In a real setup you would
+# have something like:
+#
+#   include:
+#     - project: "your-org/ci-templates"
+#       ref: main
+#       file: "/templates/docker-build.yml"
+#
+# and each job below would use `extends: .docker-build` (or similar)
+# instead of defining its own image/script from scratch. The inline
+# scripts here are placeholders so this file can run standalone.
+
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker build -t {{ image_repo }}/{{ app_name }}:$CI_COMMIT_SHORT_SHA .
+    - docker push {{ image_repo }}/{{ app_name }}:$CI_COMMIT_SHORT_SHA
+# extends: .docker-build  # from shared CI templates
+
+test:
+  stage: test
+  script:
+    - echo "Run your tests here"
+# extends: .test-runner  # from shared CI templates
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploy {{ app_name }}"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+# extends: .deploy-k8s  # from shared CI templates

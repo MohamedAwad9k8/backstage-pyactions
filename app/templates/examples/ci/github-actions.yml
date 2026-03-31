@@ -1,0 +1,32 @@
+# Example GitHub Actions workflow template
+#
+# Jinja2 variables:
+#   - app_name:    Name of the service
+#   - image_repo:  Container registry URL
+
+name: Build and Deploy {{ app_name }}
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t {{ image_repo }}/{{ app_name }}:{% raw %}${{ github.sha }}{% endraw %} .
+
+      - name: Push image
+        run: docker push {{ image_repo }}/{{ app_name }}:{% raw %}${{ github.sha }}{% endraw %}
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run tests
+        run: echo "Run your tests here"
