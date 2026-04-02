@@ -114,7 +114,7 @@ class GitLabProvider(GitProvider):
                 "name": name,
                 "namespace_id": group.id,
                 "visibility": visibility,
-                "initialize_with_readme": False,
+                "initialize_with_readme": True,
             }
         )
         logger.info(f"Project '{name}' created at {project.web_url}")

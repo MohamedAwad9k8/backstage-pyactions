@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     )
 
     # App
-    APP_NAME: str = "Backstage PyActions"
+    APP_NAME: str = "Backstage-PyActions"
     APP_PORT: int = 8000
     DEBUG: bool = False
 
@@ -18,7 +18,7 @@ class Settings(BaseSettings):
 
     # Git Provider (optional — only needed if using providers)
     GIT_PROVIDER: str = "gitlab"
-    GITLAB_URL: str | None = None
+    GITLAB_URL: str = "https://gitlab.com"
     GITLAB_TOKEN: str | None = None
     GITHUB_TOKEN: str | None = None
 

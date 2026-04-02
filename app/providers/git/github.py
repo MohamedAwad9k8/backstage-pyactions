@@ -103,19 +103,28 @@ class GitHubProvider(GitProvider):
         self, name: str, namespace_path: str, visibility: str = "private"
     ):
         gh = self.get_connection()
-        try:
-            org = gh.get_organization(namespace_path)
-            repo = org.create_repo(
-                name=name,
-                private=(visibility == "private"),
-                auto_init=False,
-            )
-        except GithubException:
+        if namespace_path:
+            try:
+                org = gh.get_organization(namespace_path)
+                repo = org.create_repo(
+                    name=name,
+                    private=(visibility == "private"),
+                    auto_init=True,
+                )
+            except GithubException:
+                logger.warning(f"Org '{namespace_path}' not found, falling back to personal account")
+                user = gh.get_user()
+                repo = user.create_repo(
+                    name=name,
+                    private=(visibility == "private"),
+                    auto_init=True,
+                )
+        else:
             user = gh.get_user()
             repo = user.create_repo(
                 name=name,
                 private=(visibility == "private"),
-                auto_init=False,
+                auto_init=True,
             )
         logger.info(f"Project '{name}' created at {repo.html_url}")
         return repo
