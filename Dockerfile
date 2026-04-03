@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY pyproject.toml .
 RUN pip install --no-cache-dir .
 
-COPY . .
+COPY main.py .
+COPY modules.yaml .
+COPY app/ app/
 
 CMD ["python", "main.py"]
