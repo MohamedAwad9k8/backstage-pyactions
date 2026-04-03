@@ -15,6 +15,11 @@ class GitHubProvider(GitProvider):
         if self._connection is None:
             logger.info("Initializing GitHub connection...")
             self._connection = Github(self._token)
+            try:
+                self._connection.get_user().login
+            except GithubException as e:
+                self._connection = None
+                raise ValueError(f"GitHub authentication failed: {e.data.get('message', str(e))}") from e
         return self._connection
 
     def get_project(self, project_path: str):
@@ -103,6 +108,19 @@ class GitHubProvider(GitProvider):
         self, name: str, namespace_path: str, visibility: str = "private"
     ):
         gh = self.get_connection()
+
+        # Check if repo already exists
+        try:
+            if namespace_path:
+                existing = gh.get_repo(f"{namespace_path}/{name}")
+            else:
+                user = gh.get_user()
+                existing = gh.get_repo(f"{user.login}/{name}")
+            logger.info(f"Project '{name}' already exists at {existing.html_url}")
+            return existing
+        except GithubException:
+            pass
+
         if namespace_path:
             try:
                 org = gh.get_organization(namespace_path)

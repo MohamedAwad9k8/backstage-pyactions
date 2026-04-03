@@ -2,6 +2,7 @@ import time
 import logging
 
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 from app.core.discovery import register_modules
@@ -11,6 +12,11 @@ app = FastAPI(
     title=settings.APP_NAME,
     description="Extend Backstage automation capabilities with Python workflows.",
 )
+
+
+@app.exception_handler(ValueError)
+async def value_error_handler(request: Request, exc: ValueError):
+    return JSONResponse(status_code=400, content={"error": str(exc)})
 
 
 @app.middleware("http")

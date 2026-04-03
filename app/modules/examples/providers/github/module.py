@@ -1,3 +1,5 @@
+import time
+
 from jinja2 import Environment, FileSystemLoader
 
 from app.core.dependencies import get_git_provider
@@ -33,7 +35,14 @@ async def handler(params: TestGithubProviderParams):
     # Create project and branch
     project = git.create_project(params.app_name, params.project_owner)
     action_log.append(f"Project '{params.app_name}' created")
-    git.create_branch(project, "init-branch", "main")
+
+    # GitHub needs a moment after auto_init before the main branch is available
+    for _ in range(5):
+        try:
+            git.create_branch(project, "init-branch", "main")
+            break
+        except Exception:
+            time.sleep(2)
     action_log.append("Branch 'init-branch' created")
 
     # Commit files

@@ -18,6 +18,11 @@ class GitLabProvider(GitProvider):
             self._connection = gitlab.Gitlab(
                 self._url, private_token=self._token
             )
+            try:
+                self._connection.auth()
+            except gitlab.exceptions.GitlabAuthenticationError as e:
+                self._connection = None
+                raise ValueError(f"GitLab authentication failed: {e}") from e
         return self._connection
 
     def get_project(self, project_path: str):
