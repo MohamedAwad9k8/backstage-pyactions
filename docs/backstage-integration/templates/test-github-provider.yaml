@@ -1,0 +1,150 @@
+# This is a Backstage Scaffolder Template that creates a new service on GitHub
+# via PyActions. It demonstrates how Backstage templates call PyActions endpoints
+# using the http:backstage:request action (provided by Roadie's HTTP Request plugin).
+#
+# The template collects user input through a multi-step form, sends it to PyActions,
+# and displays the resulting pull request link.
+
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: test-github-provider
+  title: Scaffold Service (GitHub)
+  description: Create a new project on GitHub using PyActions built-in GitHub provider
+  tags:
+    - github
+    - service
+    - pyactions
+spec:
+  owner: user:guest
+  type: service
+
+  # Parameters define the form fields shown to the developer in Backstage.
+  # Each top-level entry becomes a separate step/page in the UI.
+  parameters:
+    - title: Service Details
+      required:
+        - appName
+        - imageRepo
+      properties:
+        appName:
+          title: App Name
+          type: string
+          description: Name of the service and repository to create
+          ui:autofocus: false
+          ui:options:
+            autocomplete: "off"
+        projectOwner:
+          title: Project Owner
+          type: string
+          description: GitHub org or user (leave empty for personal account)
+          default: ""
+          ui:autofocus: false
+          ui:options:
+            autocomplete: "off"
+        imageRepo:
+          title: Image Repository
+          type: string
+          description: Container registry URL (e.g., ghcr.io/my-org)
+          ui:autofocus: false
+          ui:options:
+            autocomplete: "off"
+        imageTag:
+          title: Image Tag
+          type: string
+          description: Container image tag
+          default: latest
+          ui:autofocus: false
+          ui:options:
+            autocomplete: "off"
+
+    - title: Docker Configuration
+      required:
+        - baseImage
+        - containerPort
+      properties:
+        baseImage:
+          title: Base Image
+          type: string
+          description: Docker base image for the Dockerfile
+          # enum provides a dropdown list of allowed values
+          enum:
+            - python:3.11-slim
+            - python:3.12-slim
+            - node:20-alpine
+            - node:22-alpine
+          default: python:3.11-slim
+        containerPort:
+          title: Container Port
+          type: integer
+          description: Port the app listens on
+          default: 8080
+
+    - title: Deployment Configuration
+      required:
+        - replicaCount
+        - env
+      properties:
+        replicaCount:
+          title: Replica Count
+          type: integer
+          description: Number of pod replicas
+          minimum: 1
+          maximum: 5
+          default: 2
+          errorMessage: "Allowed values are in range 1 - 5"
+        env:
+          title: Environment
+          type: string
+          description: Deployment environment
+          enum:
+            - staging
+            - production
+          default: staging
+          # ui:widget changes the input type from a dropdown to radio buttons
+          ui:widget: radio
+
+  steps:
+    # This step sends the collected form data to PyActions via Backstage's proxy.
+    # The path "/proxy/pyactions/..." maps to the proxy config in app-config.yaml,
+    # which forwards the request to the PyActions service.
+    - id: backstage_request_with_input
+      name: Scaffold service via PyActions (GitHub)
+      action: http:backstage:request
+      input:
+        method: 'POST'
+        path: '/proxy/pyactions/test-github-provider'
+        headers:
+          Content-Type: 'application/json'
+        body: |
+          {
+            "app-name": "${{ parameters.appName }}",
+            "project-owner": "${{ parameters.projectOwner }}",
+            "image-repo": "${{ parameters.imageRepo }}",
+            "image-tag": "${{ parameters.imageTag }}",
+            "base-image": "${{ parameters.baseImage }}",
+            "container-port": "${{ parameters.containerPort }}",
+            "replica-count": "${{ parameters.replicaCount }}",
+            "env": "${{ parameters.env }}"
+          }
+
+    # debug:log is a built-in Backstage action useful for inspecting step outputs
+    # during development. Can be removed in production templates.
+    - id: capture_output
+      name: Capture Response
+      action: debug:log
+      input:
+        message: |
+          === Backstage HTTP Response ===
+          Code: ${{ steps["backstage_request_with_input"].output.code }}
+
+          === Script Return ===
+          Logs: ${{ steps["backstage_request_with_input"].output.body.logs }}
+          Pull Request URL: ${{ steps["backstage_request_with_input"].output.body.pull_request_url }}
+
+  # Output links are displayed to the developer after the template completes.
+  output:
+    links:
+      - title: "Pull Request"
+        url: ${{ steps["backstage_request_with_input"].output.body.pull_request_url }}
+        icon: github

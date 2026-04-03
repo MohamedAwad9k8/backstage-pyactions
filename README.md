@@ -2,7 +2,7 @@
 
 A Python-powered execution layer for [Backstage](https://backstage.io) automation. Extend Backstage's scaffolder capabilities with Python and reuse your existing automation workflows without rebuilding them as custom scaffolder actions in Node.js/TypeScript.
 
-> For a full guide on integrating with Backstage scaffolder templates, see [Backstage Integration Guide](docs/backstage-integration.md).
+> For a full guide on integrating with Backstage scaffolder templates, see [Backstage Integration Guide](docs/backstage-integration/README.md).
 
 ## The Problem
 
@@ -42,13 +42,17 @@ Visit `http://localhost:8000/docs` to see the Swagger UI with all registered end
 
 ### Deployment
 
-This project is designed with **Kubernetes deployment in mind**. The recommended deployment method is via Helm chart, ArgoCD, or plain Kubernetes manifests. If deploying outside of Kubernetes, you may need to adapt the security and logging approaches (see [Security](#security)).
+This project is designed with **Kubernetes deployment in mind**. The recommended deployment method is via Helm chart. The chart is packaged and available on [ArtifactHub](https://artifacthub.io/packages/search?repo=backstage-pyactions) for easy deployment on Kubernetes.
+
+By default, the Helm chart pulls a pre-built Docker image (`mawad98/backstage-pyactions:demo`) from Docker Hub. This can be overridden with your own image.
+
+For the full Kubernetes deployment guide (configuration, secrets, network policy, upgrades), see [Kubernetes Deployment Guide](docs/k8s-deployment/README.md).
 
 | Method     | Command                                   |
 | ---------- | ----------------------------------------- |
 | Local      | `uvicorn main:app --reload`               |
 | Docker     | `docker compose up --build`               |
-| Kubernetes | `helm install backstage-pyactions ./helm` |
+| Kubernetes | Via Helm chart, see [K8s Deployment Guide](docs/k8s-deployment/README.md) |
 
 ## How It Works
 
@@ -84,21 +88,25 @@ modules:
 
 ### 3. Call it from Backstage
 
-Use an HTTP request action in your Backstage scaffolder template to call your module's endpoint:
+Use an HTTP request action in your Backstage scaffolder template to call your module's endpoint through Backstage's proxy:
 
 ```yaml
 steps:
   - id: trigger-workflow
     action: http:backstage:request
     input:
-      method: POST
-      url: http://backstage-pyactions:8000/my-workflow
-      body:
-        ticket: ${{ parameters.ticket }}
-        service_name: ${{ parameters.serviceName }}
+      method: 'POST'
+      path: '/proxy/pyactions/your-endpoint'
+      headers:
+        Content-Type: 'application/json'
+      body: |
+        {
+          "param-one": "${{ parameters.paramOne }}",
+          "param-two": "${{ parameters.paramTwo }}"
+        }
 ```
 
-> For the full Backstage integration setup (installing the HTTP action plugin, configuring templates, authentication), see [Backstage Integration Guide](docs/backstage-integration.md).
+For the full Backstage integration setup (installing the HTTP action plugin, proxy configuration, example templates, authentication), see [Backstage Integration Guide](docs/backstage-integration/README.md).
 
 > **Not using Backstage?** Any HTTP client works - CI pipelines, cron jobs, Slack bots, or `curl`.
 
@@ -163,9 +171,7 @@ The pseudo-code examples demonstrate patterns that cover a wide range of automat
 
 ## Backstage Integration
 
-This project is designed to work with Backstage scaffolder templates via HTTP. Since Backstage doesn't include a native HTTP request action, you'll need a third-party scaffolder action plugin that can make HTTP calls. A widely used option is [Roadie's HTTP Request Action](https://github.com/RoadieHQ/roadie-backstage-plugins/tree/main/plugins/scaffolder-actions/scaffolder-backend-module-http-request).
-
-If Backstage adds a native HTTP action in the future, it will work with this project out of the box - nothing changes on the PyActions side.
+For the full integration guide, including plugin installation, proxy configuration, example templates, and authentication, see [Backstage Integration Guide](docs/backstage-integration/README.md).
 
 ## Security
 
@@ -262,7 +268,7 @@ If Backstage sends parameters with hyphens (e.g., `service-name`), use `Field(al
 
 ### 3. Write the handler
 
-In `module.py`, define an `async def handler` function. The function name **must** be `handler`. Its parameter **must** be typed with your Pydantic model — this is how FastAPI knows how to validate the request body:
+In `module.py`, define an `async def handler` function. The function name **must** be `handler`. Its parameter **must** be typed with your Pydantic model, as this is how FastAPI knows how to validate the request body:
 
 ```python
 from .schemas import YourParams
@@ -328,7 +334,7 @@ def test_your_module_validation(client):
     assert response.status_code == 422
 ```
 
-The `client` fixture from `conftest.py` gives you a test client that simulates HTTP requests against the full app — with discovery, security, and validation all active — without starting a real server.
+The `client` fixture from `conftest.py` gives you a test client that simulates HTTP requests against the full app (with discovery, security, and validation all active) without starting a real server.
 
 ### Test with curl
 
@@ -338,7 +344,7 @@ curl -X POST http://localhost:8000/your-endpoint \
   -H "Content-Type: application/json" \
   -d '{"name": "test", "environment": "staging"}'
 
-# Missing required field — expect 422
+# Missing required field, expect 422
 curl -X POST http://localhost:8000/your-endpoint \
   -H "Content-Type: application/json" \
   -d '{}'

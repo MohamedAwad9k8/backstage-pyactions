@@ -1,0 +1,27 @@
+# Example Backstage app-config.yaml snippets for PyActions integration
+#
+# These are the relevant sections you need to add or modify
+# in your Backstage app-config.yaml to integrate with PyActions.
+
+# --- Proxy to PyActions ---
+# Routes requests from Backstage templates to the PyActions API.
+# On Kubernetes, replace localhost:8000 with the PyActions service name
+# (e.g., http://backstage-pyactions:8000)
+proxy:
+  "/pyactions":
+    target: "http://localhost:8000"
+    changeOrigin: true
+
+# --- Register templates in the catalog ---
+# Add one entry per template file.
+catalog:
+  locations:
+    - type: file
+      target: ../../templates/test-github-provider/template.yaml
+      rules:
+        - allow: [Template]
+
+    - type: file
+      target: ../../templates/test-gitlab-provider/template.yaml
+      rules:
+        - allow: [Template]
