@@ -1,0 +1,6 @@
+apiVersion: v2
+name: backstage-pyactions
+description: Helm chart for deploying Backstage PyActions
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

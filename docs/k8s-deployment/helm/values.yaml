@@ -1,0 +1,39 @@
+replicaCount: 1
+
+image:
+  repository: mawad98/backstage-pyactions
+  tag: demo
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8000
+
+env:
+  APP_NAME: "Backstage-PyActions"
+  APP_PORT: "8000"
+  DEBUG: "false"
+  GIT_PROVIDER: "gitlab"
+  GITLAB_URL: "https://gitlab.com"
+
+# Sensitive values — reference a Kubernetes secret instead of hardcoding
+secrets:
+  name: pyactions-secrets
+  # Expected keys in the secret: API_TOKEN, GITLAB_TOKEN, GITHUB_TOKEN
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+healthCheck:
+  path: /health
+  port: 8000
+
+networkPolicy:
+  enabled: true
+  backstageLabels:
+    app: backstage
