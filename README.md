@@ -3,6 +3,8 @@
 A Python-powered execution layer for [Backstage](https://backstage.io) automation. Extend Backstage's scaffolder capabilities with Python and reuse your existing automation workflows without rebuilding them as custom scaffolder actions in Node.js/TypeScript.
 
 > For a full guide on integrating with Backstage scaffolder templates, see [Backstage Integration Guide](docs/backstage-integration/README.md).
+>
+> See [Demo](#demo) for screenshots of the full integration in action.
 
 ## The Problem
 
@@ -357,6 +359,42 @@ curl -X POST http://localhost:8000/your-endpoint \
 ```
 
 You can also test interactively via Swagger UI at `http://localhost:8000/docs`.
+
+## Demo
+
+Scaffolding a new service on GitHub via Backstage, end to end.
+
+Backstage homepage:
+
+![Backstage homepage](docs/images/backstage-homepage.png)
+
+Available templates, including the GitHub scaffold template:
+
+![Backstage templates](docs/images/backstage-templates.png)
+
+Filling out the template form with service details:
+
+![Template form](docs/images/backstage-github-template-form.png)
+
+Reviewing the parameters before execution:
+
+![Template review](docs/images/backstage-github-template-review.png)
+
+Backstage displays the result with a link to the pull request:
+
+![Results with PR URL](docs/images/backstage-results-pr-url.png)
+
+The pull request on GitHub, showing the generated CI workflow (`.github/workflows/ci.yml`):
+
+![GitHub PR - CI workflow file](docs/images/github-pr-1.png)
+
+The generated Dockerfile:
+
+![GitHub PR - Dockerfile](docs/images/github-pr-2.png)
+
+The generated Helm values file:
+
+![GitHub PR - Helm values](docs/images/github-pr-3.png)
 
 ## License
 
