@@ -44,16 +44,18 @@ Visit `http://localhost:8000/docs` to see the Swagger UI with all registered end
 
 ### Deployment
 
-This project is designed with **Kubernetes deployment in mind**. The recommended deployment method is via Helm chart. The chart is packaged and available on [ArtifactHub](https://artifacthub.io/packages/search?repo=backstage-pyactions) for easy deployment on Kubernetes.
+This project is designed with **Kubernetes deployment in mind**. The recommended deployment method is via Helm chart. The chart is packaged and available on [ArtifactHub](https://artifacthub.io/packages/helm/backstage-pyactions/backstage-pyactions) for easy deployment on Kubernetes.
+
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/backstage-pyactions)](https://artifacthub.io/packages/helm/backstage-pyactions/backstage-pyactions)
 
 By default, the Helm chart pulls a pre-built Docker image (`mawad98/backstage-pyactions:demo`) from Docker Hub. This can be overridden with your own image.
 
 For the full Kubernetes deployment guide (configuration, secrets, network policy, upgrades), see [Kubernetes Deployment Guide](docs/k8s-deployment/README.md).
 
-| Method     | Command                                   |
-| ---------- | ----------------------------------------- |
-| Local      | `uvicorn main:app --reload`               |
-| Docker     | `docker compose up --build`               |
+| Method     | Command                                                                   |
+| ---------- | ------------------------------------------------------------------------- |
+| Local      | `uvicorn main:app --reload`                                               |
+| Docker     | `docker compose up --build`                                               |
 | Kubernetes | Via Helm chart, see [K8s Deployment Guide](docs/k8s-deployment/README.md) |
 
 ## How It Works
@@ -97,10 +99,10 @@ steps:
   - id: trigger-workflow
     action: http:backstage:request
     input:
-      method: 'POST'
-      path: '/proxy/pyactions/your-endpoint'
+      method: "POST"
+      path: "/proxy/pyactions/your-endpoint"
       headers:
-        Content-Type: 'application/json'
+        Content-Type: "application/json"
       body: |
         {
           "param-one": "${{ parameters.paramOne }}",
@@ -289,10 +291,10 @@ async def handler(params: YourParams):
 Add one entry:
 
 ```yaml
-  - name: Your Workflow
-    path: app.modules.your_module
-    route: /your-endpoint
-    description: What this workflow does
+- name: Your Workflow
+  path: app.modules.your_module
+  route: /your-endpoint
+  description: What this workflow does
 ```
 
 ### 5. Restart the app
