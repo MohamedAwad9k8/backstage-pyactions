@@ -6,13 +6,16 @@ A Python-powered execution layer for [Backstage](https://backstage.io) automatio
 >
 > See [Demo](#demo) for screenshots of the full integration in action.
 
-## The Problem
+![Python](https://img.shields.io/badge/Python-306998?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![Backstage](https://img.shields.io/badge/Backstage-9BF0E1?logo=backstage&logoColor=black)
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)
+![Helm](https://img.shields.io/badge/Helm-0F1689?logo=helm&logoColor=white)
 
-Backstage is Node.js-first. Writing custom scaffolder actions means TypeScript, the Backstage plugin SDK, and dealing with plugin update breakages. But most DevOps and Platform Engineering teams already have automation written in Python. Scripts that provision infrastructure, create repos, manage deployments, configure services.
+## Why PyActions?
 
-Today, the only way to use those workflows from Backstage is to rewrite them in TypeScript. That's time-consuming, fragile, and often poorly documented.
-
-## The Solution
+Backstage is Node.js-first. Writing custom scaffolder actions means TypeScript, the Backstage plugin SDK, and dealing with plugin update breakages. But most DevOps and Platform Engineering teams already have automation written in Python. Scripts that provision infrastructure, create repos, manage deployments, configure services. Today, the only way to use those workflows from Backstage is to rewrite them in TypeScript. That's time-consuming, fragile, and often poorly documented.
 
 Backstage PyActions creates a clean separation of concerns:
 
