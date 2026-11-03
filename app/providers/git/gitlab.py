@@ -101,6 +101,43 @@ class GitLabProvider(GitProvider):
                 return mr.web_url
             raise
 
+    def merge_merge_request(
+        self, project, source_branch: str, target_branch: str
+    ) -> None:
+        merge_requests = project.mergerequests.list(state="opened")
+        for merge_request in merge_requests:
+            if (
+                merge_request.source_branch == source_branch
+                and merge_request.target_branch == target_branch
+            ):
+                merge_request.merge(should_remove_source_branch=True)
+                logger.info(f"Merge request merged: {merge_request.web_url}")
+                return
+        logger.info(
+            f"No open merge request found for {source_branch} -> {target_branch}; "
+            "it may already be merged"
+        )
+
+    def create_repository_variables(
+        self, project, variables: dict[str, str]
+    ) -> None:
+        for key, value in variables.items():
+            try:
+                variable = project.variables.get(key)
+            except gitlab.exceptions.GitlabGetError as e:
+                if e.response_code != 404:
+                    raise
+                project.variables.create({"key": key, "value": value})
+                logger.info(f"Project variable '{key}' created")
+                continue
+
+            if variable.value != value:
+                variable.value = value
+                variable.save()
+                logger.info(f"Project variable '{key}' updated")
+            else:
+                logger.info(f"Project variable '{key}' already has the requested value")
+
     def create_project(
         self, name: str, namespace_path: str, visibility: str = "private"
     ):
