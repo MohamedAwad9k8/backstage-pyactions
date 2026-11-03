@@ -26,6 +26,10 @@ Your Python automation becomes a backend that Backstage calls over HTTP. No rewr
 
 This bridges the Node.js and Python ecosystems, letting platform teams use the best tool for each job. Backstage for the developer portal, Python for the automation engine behind it.
 
+### Git provider capabilities
+
+The Git provider interface supports creating branches, committing files, opening pull/merge requests, explicitly merging an existing request, and creating or updating repository-level CI/CD variables. Request creation and merging are separate operations: callers can create a request and leave it open for a person to review, or call `merge_merge_request(...)` when automatic merging is desired. Variable creation is idempotent and updates an existing value when the requested value changes. Both the GitHub and GitLab providers implement these capabilities.
+
 ## Quick Start
 
 ```bash

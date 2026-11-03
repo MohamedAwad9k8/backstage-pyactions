@@ -104,6 +104,45 @@ class GitHubProvider(GitProvider):
                     return pr.html_url
             raise
 
+    def merge_merge_request(
+        self, project, source_branch: str, target_branch: str
+    ) -> None:
+        pulls = project.get_pulls(
+            state="open", head=source_branch, base=target_branch
+        )
+        for pull_request in pulls:
+            result = pull_request.merge(merge_method="squash")
+            if not result.merged:
+                raise RuntimeError(
+                    f"GitHub pull request could not be merged: {result.message}"
+                )
+            logger.info(f"Pull request merged: {pull_request.html_url}")
+            return
+        logger.info(
+            f"No open pull request found for {source_branch} -> {target_branch}; "
+            "it may already be merged"
+        )
+
+    def create_repository_variables(
+        self, project, variables: dict[str, str]
+    ) -> None:
+        for name, value in variables.items():
+            try:
+                variable = project.get_variable(name)
+            except GithubException as e:
+                if e.status != 404:
+                    raise
+                project.create_variable(name, value)
+                logger.info(f"Repository variable '{name}' created")
+                continue
+
+            if variable.value != value:
+                if not variable.edit(value):
+                    raise RuntimeError(f"GitHub repository variable '{name}' could not be updated")
+                logger.info(f"Repository variable '{name}' updated")
+            else:
+                logger.info(f"Repository variable '{name}' already has the requested value")
+
     def create_project(
         self, name: str, namespace_path: str, visibility: str = "private"
     ):

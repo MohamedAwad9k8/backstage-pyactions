@@ -31,6 +31,20 @@ class GitProvider(ABC):
         ...
 
     @abstractmethod
+    def merge_merge_request(
+        self, project, source_branch: str, target_branch: str
+    ) -> None:
+        """Merge the open request for source_branch into target_branch."""
+        ...
+
+    @abstractmethod
+    def create_repository_variables(
+        self, project, variables: dict[str, str]
+    ) -> None:
+        """Create or update repository-level CI/CD variables."""
+        ...
+
+    @abstractmethod
     def create_project(
         self, name: str, namespace_path: str, visibility: str = "private"
     ):
